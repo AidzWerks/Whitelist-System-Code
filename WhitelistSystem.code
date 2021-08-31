@@ -1,0 +1,105 @@
+/*______________________________________________________________________________________________________________________________________________________________________
+ *  Project: Aidz
+ *  Author: Aidz Achmidt                                                                                                                                                                                                                                                                                                      
+ *  Developer: Aidz Achmidt                         
+ *  License: github.com/AidzWerks              
+ *  © 2020 Aidz Achmidt Development
+ *  All rights reserved             
+ *  Dont remove credits from the development team of the gamemode "AIDZ"
+ __________________________________________________________________________________________________________________________*/
+
+//COLOR DEFINES
+#define COLOR_WHITE   0xFFFBFFFF
+#define COLOR_YELLOW    0xFFFB00FF
+
+//DIALOGS 
+#define DIALOG_WHITELIST 14139
+#define DIALOG_REMOVE   14140
+
+// PUBLICATIONS:: OnPlayerConnect
+{
+        new name[MAX_PLAYER_NAME+1];
+        GetPlayerName(playerid, name, sizeof(name));
+        new player[200];
+        format(player,sizeof(player),"/whitelist/%s.txt",name);
+        if(!dini_Exists(player))
+        {
+            SendClientMessage(playerid, COLOR_YELLOW, "You are not whitelisted.");
+            Kick(playerid);
+        }
+        else
+        {
+            // Allow player to log in.
+        }
+        return 1;
+}
+//PUBLICATION:: OnDialogResponse
+
+{
+        if(dialogid == DIALOG_WHITELIST)
+        {
+            new player[200], string[128];
+            format(player,sizeof(player),"/whitelist/%s.txt",inputtext);
+            if(response == 1)
+                {
+                        if(!dini_Exists(player))
+                        {
+                            format(string,sizeof(string),"{00FFFF}%s{FFFFFF} has been whitelisted.", inputtext);
+                            SendClientMessage(playerid,COLOR_WHITE,string);
+                            dini_Create(player);
+                            ShowPlayerDialog(playerid,DIALOG_WHITELIST,DIALOG_STYLE_INPUT,"{00FFFF}Whitelist","{FF0000}Fill in a player name.","Continue","Cancel");
+                        }
+                        else
+                        {
+                            format(string,sizeof(string),"{00FFFF}%s{FFFFFF} is not already whitelisted!", inputtext);
+                            SendClientMessage(playerid,COLOR_WHITE,string);
+                            ShowPlayerDialog(playerid,DIALOG_WHITELIST,DIALOG_STYLE_INPUT,"{00FFFF}Whitelist","{FF0000}Fill in a player name.\n* Unknown player!","Continue","Cancel");
+                        }
+                }
+        }
+        if(dialogid == DIALOG_REMOVE)
+        {
+            new player[200], string[128];
+            format(player,sizeof(player),"/whitelist/%s.txt",inputtext);
+            if(response == 1)
+            {
+                if(dini_Exists(player))
+                {
+                dini_Remove(player);
+                format(string,sizeof(string),"{00FFFF}%s{FFFFFF} has been blacklisted.", inputtext);
+                SendClientMessage(playerid,COLOR_WHITE,string);
+                ShowPlayerDialog(playerid,DIALOG_REMOVE,DIALOG_STYLE_INPUT,"{00FFFF}Whitelist","{FF0000}Fill in a player name.","Austragen","Abbrechen");
+                }
+                else
+                {
+                format(string,sizeof(string),"{00FFFF}%s{FFFFFF} is not on the whitelist!", inputtext);
+                SendClientMessage(playerid,COLOR_WHITE,string);
+                ShowPlayerDialog(playerid,DIALOG_REMOVE,DIALOG_STYLE_INPUT,"{00FFFF}Whitelist","{FF0000}Fill in a player name.","Continue","Cancel");
+                }
+            }
+        }
+        return 1;
+}
+
+//COMMAND
+CMD:whitelist(playerid,params[])
+{
+    if(IsPlayerAdmin(playerid))
+    {
+    ShowPlayerDialog(playerid,DIALOG_WHITELIST,DIALOG_STYLE_INPUT,"{00FFFF}Whitelist","{FF0000}Fill in a player name.","Continue","Cancel");
+    return 1;
+    }
+    else SendClientMessage(playerid, COLOR_YELLOW, "Login to RCON to continue.");
+    return 1;
+}
+
+CMD:blacklist(playerid,params[])
+{
+    if(IsPlayerAdmin(playerid))
+    {
+    ShowPlayerDialog(playerid,DIALOG_REMOVE,DIALOG_STYLE_INPUT,"{00FFFF}Blacklist","{FF0000}Fill in a player name.","Continue","Cancel");
+    return 1;
+    }
+    else SendClientMessage(playerid, COLOR_YELLOW, "Login to RCON to continue.");
+    return 1;
+}
